@@ -1,0 +1,10 @@
+settings/Mainnet.toml
+settings/Testnet.toml
+history.txt
+scraps.txt
+cvm/vmstate.db
+.DS_Store
+coverage.lcov
+deployments/
+.editorconfig
+.vscode/
