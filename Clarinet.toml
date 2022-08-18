@@ -13,12 +13,6 @@ path = "contracts/proposals/bootstrap.clar"
 [contracts.core-dao]
 path = "contracts/core-dao.clar"
 
-[contracts.emergency-execute]
-path = "contracts/extensions/emergencies/emergency-execute.clar"
-
-[contracts.emergency-proposals]
-path = "contracts/extensions/emergencies/emergency-proposals.clar"
-
 [contracts.extension-trait]
 path = "contracts/traits/extension-trait.clar"
 
@@ -37,14 +31,11 @@ path = "contracts/traits/sip10-trait.clar"
 [contracts.sip9-trait]
 path = "contracts/traits/sip9-trait.clar"
 
-[contracts.token]
-path = "contracts/extensions/membership/token.clar"
+[contracts.nft]
+path = "contracts/extensions/membership/nft.clar"
 
-[contracts.transfer-stx]
-path = "contracts/proposals/transfer-stx.clar"
-
-[contracts.transfer-tokens]
-path = "contracts/proposals/transfer-tokens.clar"
+[contracts.transfer-nft]
+path = "contracts/proposals/transfer-nft.clar"
 
 [contracts.treasury]
 path = "contracts/extensions/treasury.clar"

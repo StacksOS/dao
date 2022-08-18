@@ -5,18 +5,14 @@
 (use-trait sip10-trait .sip10-trait.sip10-trait)
 
 (define-constant ERR_UNAUTHORIZED (err u2500))
-(define-constant ERR_NOT_GOVERNANCE_TOKEN (err u2501))
-(define-constant ERR_UNKNOWN_PARAMETER (err u2502))
-(define-constant ERR_PROPOSAL_ALREADY_EXECUTED (err u2503))
-(define-constant ERR_PROPOSAL_ALREADY_EXISTS (err u2504))
-(define-constant ERR_UNKNOWN_PROPOSAL (err u2505))
-(define-constant ERR_PROPOSAL_ALREADY_CONCLUDED (err u2506))
-(define-constant ERR_PROPOSAL_INACTIVE (err u2507))
-(define-constant ERR_END_BLOCK_HEIGHT_NOT_REACHED (err u2508))
-(define-constant ERR_INSUFFICIENT_BALANCE (err u2509))
-(define-constant ERR_ALREADY_VOTED (err u2510))
-
-(define-constant MICRO (pow u10 u6))
+(define-constant ERR_UNKNOWN_PARAMETER (err u2501))
+(define-constant ERR_PROPOSAL_ALREADY_EXECUTED (err u2502))
+(define-constant ERR_PROPOSAL_ALREADY_EXISTS (err u2503))
+(define-constant ERR_UNKNOWN_PROPOSAL (err u2504))
+(define-constant ERR_PROPOSAL_ALREADY_CONCLUDED (err u2505))
+(define-constant ERR_PROPOSAL_INACTIVE (err u2506))
+(define-constant ERR_END_BLOCK_HEIGHT_NOT_REACHED (err u2507))
+(define-constant ERR_ALREADY_VOTED (err u2518))
 
 (define-map Proposals
 	principal
@@ -31,15 +27,11 @@
 	}
 )
 
-(define-map MemberTotalVotes {proposal: principal, voter: principal, governanceToken: principal} uint)
+(define-map MemberVotes { proposal: principal, voter: principal, tokenId: uint } bool)
 (define-map parameters (string-ascii 34) uint)
 
-(map-set parameters "voteThreshold" (get-micro-balance u1))
-(map-set parameters "quorumThreshold" (get-micro-balance u12500))
+(map-set parameters "quorumThreshold" u0)
 (map-set parameters "executionDelay" u144)
-
-(define-map Delegates principal principal)
-(define-map Delegators principal bool)
 
 (define-public (is-dao-or-extension)
 	(ok (asserts! (or (is-eq tx-sender .core-dao) (contract-call? .core-dao is-extension contract-caller)) ERR_UNAUTHORIZED))
@@ -53,24 +45,13 @@
 	)
 )
 
-(define-public (add-proposal (proposal <proposal-trait>) (data {startBlockHeight: uint, endBlockHeight: uint, proposer: principal}))
+(define-public (add-proposal (proposal <proposal-trait>) (data { startBlockHeight: uint, endBlockHeight: uint, proposer: principal }))
 	(begin
 		(try! (is-dao-or-extension))
 		(asserts! (is-none (contract-call? .core-dao executed-at proposal)) ERR_PROPOSAL_ALREADY_EXECUTED)
-    (asserts! (map-insert Proposals (contract-of proposal) (merge {votesFor: u0, votesAgainst: u0, concluded: false, passed: false} data)) ERR_PROPOSAL_ALREADY_EXISTS)
-    (print {event: "propose", proposal: proposal, startBlockHeight: (get startBlockHeight data), endBlockHeight: (get endBlockHeight data), proposer: tx-sender})
+    (asserts! (map-insert Proposals (contract-of proposal) (merge { votesFor: u0, votesAgainst: u0, concluded: false, passed: false } data)) ERR_PROPOSAL_ALREADY_EXISTS)
+    (print { event: "propose", proposal: proposal, startBlockHeight: (get startBlockHeight data), endBlockHeight: (get endBlockHeight data), proposer: tx-sender })
 		(ok true)
-	)
-)
-
-(define-read-only (get-micro-balance (amount uint))
-	(let
-		(
-			(decimals (unwrap-panic (contract-call? .token get-decimals)))
-			(micro (pow u10 decimals))
-		)
-
-		(* micro amount)
 	)
 )
 
@@ -82,46 +63,55 @@
 	(map-get? Proposals proposal)
 )
 
-(define-read-only (get-voting-power (voter principal) (blockHeight uint))
+(define-read-only (get-voting-power (tokenId uint) (blockHeight uint))
   (at-block
-    (unwrap! (get-block-info? id-header-hash blockHeight) none) (some (unwrap-panic (contract-call? .token get-balance voter)))
+    (unwrap! (get-block-info? id-header-hash blockHeight) none) (unwrap! (contract-call? .nft get-owner tokenId) none)
   )
 )
 
-(define-read-only (get-current-total-votes (proposal principal) (voter principal))
-	(default-to u0 (map-get? MemberTotalVotes {proposal: proposal, voter: voter, governanceToken: .token}))
+(define-read-only (get-current-votes (proposal principal) (voter principal) (tokenId uint))
+	(default-to false (map-get? MemberVotes { proposal: proposal, voter: voter, tokenId: tokenId }))
 )
 
-(define-public (can-vote (who principal) (tokenThreshold uint))
-	(let
-		(
-			(balance (unwrap-panic (contract-call? .token get-balance tx-sender)))
-		)
-		(ok (>= balance (* MICRO tokenThreshold)))
-	)
+(define-read-only (can-vote (who principal) (tokenId uint) (blockHeight uint))
+	(match (get-voting-power tokenId blockHeight) owner (is-eq who owner) false)
 )
 
-(define-public (vote (for bool) (proposal principal))
+(define-public (vote (for bool) (proposal principal) (tokenId uint))
 	(let
 		(
 			(proposalData (unwrap! (map-get? Proposals proposal) ERR_UNKNOWN_PROPOSAL))
-			(amount (unwrap-panic (get-voting-power tx-sender (get startBlockHeight proposalData))))
 		)
+		(asserts! (can-vote tx-sender tokenId (get startBlockHeight proposalData)) ERR_UNAUTHORIZED)
 		(asserts! (>= block-height (get startBlockHeight proposalData)) ERR_PROPOSAL_INACTIVE)
 		(asserts! (< block-height (get endBlockHeight proposalData)) ERR_PROPOSAL_INACTIVE)
-		(asserts! (unwrap-panic (can-vote tx-sender (try! (get-parameter "voteThreshold")))) ERR_INSUFFICIENT_BALANCE)
-		(asserts! (is-eq u0 (get-current-total-votes proposal tx-sender)) ERR_ALREADY_VOTED)
-		(map-set MemberTotalVotes {proposal: proposal, voter: tx-sender, governanceToken: .token}
-			(+ (get-current-total-votes proposal tx-sender) amount)
+		(asserts! (is-eq false (get-current-votes proposal tx-sender tokenId)) ERR_ALREADY_VOTED)
+		(map-set MemberVotes { proposal: proposal, voter: tx-sender, tokenId: tokenId }
+			true
 		)
 		(map-set Proposals proposal
 			(if for
-				(merge proposalData {votesFor: (+ (get votesFor proposalData) amount)})
-				(merge proposalData {votesAgainst: (+ (get votesAgainst proposalData) amount)})
+				(merge proposalData { votesFor: (+ (get votesFor proposalData) u1) })
+				(merge proposalData { votesAgainst: (+ (get votesAgainst proposalData) u1) })
 			)
 		)
-		(print {event: "vote", proposal: proposal, voter: tx-sender, for: for, amount: amount})
+		(print { event: "vote", proposal: proposal, voter: tx-sender, for: for, amount: u1, tokenId: tokenId })
 		(ok true)
+	)
+)
+
+(define-public (vote-many (votes (list 100 { for: bool, proposal: principal, tokenId: uint })))
+	(ok (map vote-many-iter votes))
+)
+
+(define-private (vote-many-iter (data { for: bool, proposal: principal, tokenId: uint }))
+	(let
+		(
+			(for (get for data))
+			(proposal (get proposal data))
+			(tokenId (get tokenId data))
+		)
+		(vote for proposal tokenId)
 	)
 )
 
@@ -130,13 +120,13 @@
 		(
 			(proposalData (unwrap! (map-get? Proposals (contract-of proposal)) ERR_UNKNOWN_PROPOSAL))
 			(totalVotes (+ (get votesFor proposalData) (get votesAgainst proposalData)))
-			(quorumThreshold (* MICRO (try! (get-parameter "quorumThreshold"))))
+			(quorumThreshold (try! (get-parameter "quorumThreshold")))
       (passed (and (>= totalVotes quorumThreshold) (> (get votesFor proposalData) (get votesAgainst proposalData))))
 		)
 		(asserts! (not (get concluded proposalData)) ERR_PROPOSAL_ALREADY_CONCLUDED)
 		(asserts! (>= block-height (+ (try! (get-parameter "executionDelay")) (get endBlockHeight proposalData))) ERR_END_BLOCK_HEIGHT_NOT_REACHED)
-		(map-set Proposals (contract-of proposal) (merge proposalData {concluded: true, passed: passed}))
-		(print {event: "conclude", proposal: proposal, totalVotes: totalVotes, quorum: quorumThreshold, passed: passed})
+		(map-set Proposals (contract-of proposal) (merge proposalData { concluded: true, passed: passed }))
+		(print { event: "conclude", proposal: proposal, totalVotes: totalVotes, quorum: quorumThreshold, passed: passed })
 		(and passed (try! (contract-call? .core-dao execute proposal tx-sender)))
 		(ok passed)
 	)

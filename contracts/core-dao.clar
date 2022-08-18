@@ -20,19 +20,19 @@
 (define-public (set-extension (extension principal) (enabled bool))
 	(begin
 		(try! (is-self-or-extension))
-		(print {event: "extension", extension: extension, enabled: enabled})
+		(print { event: "extension", extension: extension, enabled: enabled })
 		(ok (map-set Extensions extension enabled))
 	)
 )
 
-(define-private (set-extensions-iter (item {extension: principal, enabled: bool}))
+(define-private (set-extensions-iter (item { extension: principal, enabled: bool }))
 	(begin
-		(print {event: "extension", extension: (get extension item), enabled: (get enabled item)})
+		(print { event: "extension", extension: (get extension item), enabled: (get enabled item) })
 		(map-set Extensions (get extension item) (get enabled item))
 	)
 )
 
-(define-public (set-extensions (extensionList (list 200 {extension: principal, enabled: bool})))
+(define-public (set-extensions (extensionList (list 200 { extension: principal, enabled: bool })))
 	(begin
 		(try! (is-self-or-extension))
 		(ok (map set-extensions-iter extensionList))
@@ -47,7 +47,7 @@
 	(begin
 		(try! (is-self-or-extension))
 		(asserts! (map-insert ExecutedProposals (contract-of proposal) block-height) ERR_ALREADY_EXECUTED)
-		(print {event: "execute", proposal: proposal})
+		(print { event: "execute", proposal: proposal })
 		(as-contract (contract-call? proposal execute sender))
 	)
 )
@@ -56,7 +56,7 @@
 	(let ((sender tx-sender))
 		(asserts! (is-eq sender (var-get executive)) ERR_UNAUTHORIZED)
 		(var-set executive (as-contract tx-sender))
-		(print {event: "init", proposal: proposal})
+		(print { event: "init", proposal: proposal })
 		(as-contract (execute proposal sender))
 	)
 )
