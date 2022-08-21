@@ -25,7 +25,7 @@
   )
 )
 
-(define-public (set-whitelists (whitelist (list 100 {token: principal, enabled: bool})))
+(define-public (set-whitelists (whitelist (list 100 { token: principal, enabled: bool })))
   (begin
     (try! (is-dao-or-extension))
     (ok (map set-whitelist-iter whitelist))
