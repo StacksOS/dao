@@ -5,9 +5,6 @@
 
 (define-constant ERR_UNAUTHORIZED (err u3200))
 (define-constant ERR_ASSET_NOT_WHITELISTED (err u3201))
-(define-constant ERR_FAILED_STX_TRANSFER (err u3202))
-(define-constant ERR_FAILED_SIP9_TRANSFER (err u3203))
-(define-constant ERR_FAILED_SIP10_TRANSFER (err u3204))
 
 (define-constant TREASURY_ADDRESS (as-contract tx-sender))
 
@@ -34,7 +31,7 @@
 
 (define-public (stx-deposit (amount uint))
   (begin
-    (unwrap! (stx-transfer? amount tx-sender TREASURY_ADDRESS) ERR_FAILED_STX_TRANSFER)
+    (try! (stx-transfer? amount tx-sender TREASURY_ADDRESS))
     (print { event: "stx-deposit", amount: amount, caller: tx-sender })
     (ok true)
   )
@@ -43,7 +40,7 @@
 (define-public (sip9-deposit (asset <sip9>) (id uint))
   (begin
     (asserts! (is-whitelisted (contract-of asset)) ERR_ASSET_NOT_WHITELISTED)
-    (unwrap! (contract-call? asset transfer id tx-sender TREASURY_ADDRESS) ERR_FAILED_SIP9_TRANSFER)
+    (try! (contract-call? asset transfer id tx-sender TREASURY_ADDRESS))
     (print { event: "sip9-deposit", assetContract: (contract-of asset), tokenId: id, caller: tx-sender })
     (ok true)
   )
@@ -52,7 +49,7 @@
 (define-public (sip10-deposit (asset <sip10>) (amount uint))
   (begin
     (asserts! (is-whitelisted (contract-of asset)) ERR_ASSET_NOT_WHITELISTED)
-    (unwrap! (contract-call? asset transfer amount tx-sender TREASURY_ADDRESS none) ERR_FAILED_SIP10_TRANSFER)
+    (try! (contract-call? asset transfer amount tx-sender TREASURY_ADDRESS none))
     (print { event: "sip10-deposit", amount: amount, assetContract: (contract-of asset), caller: tx-sender })
     (ok true)
   )
@@ -62,7 +59,7 @@
   (begin
     (try! (is-dao-or-extension))
     (match memo with-memo (print with-memo) 0x)
-    (unwrap! (as-contract (stx-transfer? amount TREASURY_ADDRESS recipient)) ERR_FAILED_STX_TRANSFER)
+    (try! (as-contract (stx-transfer? amount TREASURY_ADDRESS recipient)))
     (print { event: "stx-transfer", amount: amount, recipient: recipient, memo: (if (is-none memo) none (some memo)), caller: tx-sender })
     (ok true)
   )
@@ -72,7 +69,7 @@
   (begin
     (try! (is-dao-or-extension))
     (asserts! (is-whitelisted (contract-of asset)) ERR_ASSET_NOT_WHITELISTED)
-    (unwrap! (as-contract (contract-call? asset transfer tokenId TREASURY_ADDRESS recipient)) ERR_FAILED_SIP9_TRANSFER)
+    (try! (as-contract (contract-call? asset transfer tokenId TREASURY_ADDRESS recipient)))
     (print { event: "sip9-transfer", tokenId: tokenId, recipient: recipient, caller: tx-sender })
     (ok true)
   )
@@ -82,7 +79,7 @@
   (begin
     (try! (is-dao-or-extension))
     (asserts! (is-whitelisted (contract-of asset)) ERR_ASSET_NOT_WHITELISTED)
-    (unwrap! (as-contract (contract-call? asset transfer amount TREASURY_ADDRESS recipient memo)) ERR_FAILED_SIP10_TRANSFER)
+    (try! (as-contract (contract-call? asset transfer amount TREASURY_ADDRESS recipient memo)))
     (print { event: "sip10-transfer", assetContract: (contract-of asset), recipient: recipient, caller: tx-sender })
     (ok true)
   )

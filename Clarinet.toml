@@ -6,12 +6,26 @@ telemetry = false
 requirements = []
 cache_dir = "/Users/ryanwaits/.clarinet/cache"
 boot_contracts = ["pox", "costs-v2", "bns"]
-
 [contracts.bootstrap]
 path = "contracts/proposals/bootstrap.clar"
 
+[contracts.club-governance-token]
+path = "contracts/extensions/membership/club-governance-token.clar"
+
+[contracts.club-governance-token-trait]
+path = "contracts/traits/club-governance-token-trait.clar"
+
+[contracts.club-membership-nft]
+path = "contracts/extensions/membership/club-membership-nft.clar"
+
+[contracts.club-membership-nft-trait]
+path = "contracts/traits/club-membership-nft-trait.clar"
+
 [contracts.core-dao]
 path = "contracts/core-dao.clar"
+
+[contracts.distribute-funds]
+path = "contracts/proposals/distribute-funds.clar"
 
 [contracts.emergency-execute]
 path = "contracts/extensions/emergencies/emergency-execute.clar"
@@ -21,6 +35,9 @@ path = "contracts/extensions/emergencies/emergency-proposals.clar"
 
 [contracts.extension-trait]
 path = "contracts/traits/extension-trait.clar"
+
+[contracts.investment-club]
+path = "contracts/extensions/investment-club.clar"
 
 [contracts.proposal-submission]
 path = "contracts/extensions/submissions/proposal-submission.clar"
@@ -36,15 +53,6 @@ path = "contracts/traits/sip10-trait.clar"
 
 [contracts.sip9-trait]
 path = "contracts/traits/sip9-trait.clar"
-
-[contracts.token]
-path = "contracts/extensions/membership/token.clar"
-
-[contracts.transfer-stx]
-path = "contracts/proposals/transfer-stx.clar"
-
-[contracts.transfer-tokens]
-path = "contracts/proposals/transfer-tokens.clar"
 
 [contracts.treasury]
 path = "contracts/extensions/treasury.clar"
