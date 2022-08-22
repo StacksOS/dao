@@ -1,0 +1,7 @@
+settings/Mainnet.toml
+settings/Testnet.toml
+history.txt
+coverage.lcov
+deployments/
+.editorconfig
+.vscode/
