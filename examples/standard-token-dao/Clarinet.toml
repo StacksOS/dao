@@ -1,5 +1,5 @@
 [project]
-name = "stacksos/template"
+name = "stacksos-template"
 authors = []
 description = ""
 telemetry = false

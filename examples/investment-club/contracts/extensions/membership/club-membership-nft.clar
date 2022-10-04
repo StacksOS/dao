@@ -7,7 +7,7 @@
 
 (define-constant MEMBERSHIP_LIMIT u99)
 
-(define-non-fungible-token Stacks-OS-Membership uint)
+(define-non-fungible-token Club-Pass uint)
 
 (define-data-var lastId uint u0)
 (define-data-var totalSupply uint u0)
@@ -24,24 +24,24 @@
 		(try! (is-dao-or-extension))
 		(let
 			(
-				(nextId (+ u1 (var-get lastId)))
-				(newTotalSupply (+ u1 (var-get totalSupply)))
+				(nextId (+ (var-get lastId) u1))
+				(newTotalSupply (+ (var-get totalSupply) u1))
 			)
 			(asserts! (<= newTotalSupply MEMBERSHIP_LIMIT) ERR_MEMBERSHIP_LIMIT_REACHED)
 			(asserts! (map-insert Members recipient true) ERR_ALREADY_MEMBER)
 			(var-set lastId nextId)
 			(var-set totalSupply newTotalSupply)
-			(nft-mint? Stacks-OS-Membership nextId recipient)
+			(nft-mint? Club-Pass nextId recipient)
 		)
 	)
 )
 
-(define-public (burn (id uint) (owner principal))
+(define-public (burn (tokenId uint) (owner principal))
 	(begin
 		(try! (is-dao-or-extension))
-		(var-set totalSupply (- u1 (var-get totalSupply)))
+		(var-set totalSupply (- (var-get totalSupply) u1))
 		(map-delete Members owner)
-		(nft-burn? Stacks-OS-Membership id owner)
+		(nft-burn? Club-Pass tokenId owner)
 	)
 )
 
@@ -65,7 +65,7 @@
 )
 
 (define-read-only (get-owner (tokenId uint))
-	(nft-get-owner? Stacks-OS-Membership tokenId)
+	(nft-get-owner? Club-Pass tokenId)
 )
 
 (define-read-only (is-member (who principal))

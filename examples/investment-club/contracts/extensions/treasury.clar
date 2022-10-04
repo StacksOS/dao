@@ -6,7 +6,7 @@
 (define-constant ERR_UNAUTHORIZED (err u3200))
 (define-constant ERR_ASSET_NOT_WHITELISTED (err u3201))
 
-(define-constant TREASURY_ADDRESS (as-contract tx-sender))
+(define-constant TREASURY (as-contract tx-sender))
 
 (define-map WhitelistedAssets principal bool)
 
@@ -17,7 +17,11 @@
 (define-public (set-whitelist (token principal) (enabled bool))
   (begin
     (try! (is-dao-or-extension))
-    (print { event: "whitelist", token: token, enabled: enabled, caller: tx-sender })
+    (print {
+      event: "whitelist",
+      token: token,
+      enabled: enabled,
+    })
     (ok (map-set WhitelistedAssets token enabled))
   )
 )
@@ -29,28 +33,32 @@
   )
 )
 
-(define-public (stx-deposit (amount uint))
+(define-public (deposit-stx (amount uint))
   (begin
-    (try! (stx-transfer? amount tx-sender TREASURY_ADDRESS))
-    (print { event: "stx-deposit", amount: amount, caller: tx-sender })
+    (try! (stx-transfer? amount tx-sender TREASURY))
+    (print {
+      event: "deposit-stx",
+      amount: amount,
+      caller: tx-sender
+    })
     (ok true)
   )
 )
 
-(define-public (sip9-deposit (asset <sip9>) (id uint))
+(define-public (deposit-sip9 (asset <sip9>) (id uint))
   (begin
     (asserts! (is-whitelisted (contract-of asset)) ERR_ASSET_NOT_WHITELISTED)
-    (try! (contract-call? asset transfer id tx-sender TREASURY_ADDRESS))
-    (print { event: "sip9-deposit", assetContract: (contract-of asset), tokenId: id, caller: tx-sender })
+    (try! (contract-call? asset transfer id tx-sender TREASURY))
+    (print { event: "deposit-sip9", assetContract: (contract-of asset), tokenId: id, caller: tx-sender })
     (ok true)
   )
 )
 
-(define-public (sip10-deposit (asset <sip10>) (amount uint))
+(define-public (deposit-sip10 (asset <sip10>) (amount uint))
   (begin
     (asserts! (is-whitelisted (contract-of asset)) ERR_ASSET_NOT_WHITELISTED)
-    (try! (contract-call? asset transfer amount tx-sender TREASURY_ADDRESS none))
-    (print { event: "sip10-deposit", amount: amount, assetContract: (contract-of asset), caller: tx-sender })
+    (try! (contract-call? asset transfer amount tx-sender TREASURY none))
+    (print { event: "deposit-sip10", amount: amount, assetContract: (contract-of asset), caller: tx-sender })
     (ok true)
   )
 )
@@ -59,7 +67,7 @@
   (begin
     (try! (is-dao-or-extension))
     (match memo with-memo (print with-memo) 0x)
-    (try! (as-contract (stx-transfer? amount TREASURY_ADDRESS recipient)))
+    (try! (as-contract (stx-transfer? amount TREASURY recipient)))
     (print { event: "stx-transfer", amount: amount, recipient: recipient, memo: (if (is-none memo) none (some memo)), caller: tx-sender })
     (ok true)
   )
@@ -69,7 +77,7 @@
   (begin
     (try! (is-dao-or-extension))
     (asserts! (is-whitelisted (contract-of asset)) ERR_ASSET_NOT_WHITELISTED)
-    (try! (as-contract (contract-call? asset transfer tokenId TREASURY_ADDRESS recipient)))
+    (try! (as-contract (contract-call? asset transfer tokenId TREASURY recipient)))
     (print { event: "sip9-transfer", tokenId: tokenId, recipient: recipient, caller: tx-sender })
     (ok true)
   )
@@ -79,7 +87,7 @@
   (begin
     (try! (is-dao-or-extension))
     (asserts! (is-whitelisted (contract-of asset)) ERR_ASSET_NOT_WHITELISTED)
-    (try! (as-contract (contract-call? asset transfer amount TREASURY_ADDRESS recipient memo)))
+    (try! (as-contract (contract-call? asset transfer amount TREASURY recipient memo)))
     (print { event: "sip10-transfer", assetContract: (contract-of asset), recipient: recipient, caller: tx-sender })
     (ok true)
   )
@@ -115,12 +123,16 @@
 )
 
 (define-read-only (get-balance)
-  (stx-get-balance TREASURY_ADDRESS)
+  (stx-get-balance TREASURY)
 )
 
 (define-private (set-whitelist-iter (data { token: principal, enabled: bool }))
   (begin
-    (print { event: "whitelist", token: (get token data), enabled: (get enabled data) })
+    (print {
+      event: "whitelist",
+      token: (get token data),
+      enabled: (get enabled data)
+    })
     (map-set WhitelistedAssets (get token data) (get enabled data))
   )
 )
@@ -130,7 +142,7 @@
     (try! previousResult)
     (match (get memo data) with-memo (print with-memo) 0x)
     (print { event: "stx-transfer", amount: (get amount data), recipient: (get recipient data), memo: (if (is-none (get memo data)) none (some (get memo data))), caller: tx-sender })
-    (stx-transfer? (get amount data) TREASURY_ADDRESS (get recipient data))
+    (stx-transfer? (get amount data) TREASURY (get recipient data))
   )
 )
 
