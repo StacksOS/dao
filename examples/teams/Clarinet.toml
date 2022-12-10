@@ -1,0 +1,44 @@
+[project]
+name = "stacksos-template"
+authors = []
+description = ""
+telemetry = false
+requirements = []
+cache_dir = "/Users/ryanwaits/.clarinet/cache"
+boot_contracts = ["pox", "costs-v2", "bns"]
+[contracts.bootstrap]
+path = "contracts/proposals/bootstrap.clar"
+
+[contracts.core-dao]
+path = "contracts/core-dao.clar"
+
+[contracts.extension-trait]
+path = "contracts/traits/extension-trait.clar"
+
+[contracts.proposal-trait]
+path = "contracts/traits/proposal-trait.clar"
+
+[contracts.sip10-trait]
+path = "contracts/traits/sip10-trait.clar"
+
+[contracts.sip9-trait]
+path = "contracts/traits/sip9-trait.clar"
+
+[contracts.treasury]
+path = "contracts/extensions/treasury.clar"
+
+[contracts.multisig]
+path = "contracts/extensions/multisig.clar"
+
+[repl]
+costs_version = 2
+parser_version = 2
+
+[repl.analysis]
+passes = []
+
+[repl.analysis.check_checker]
+strict = false
+trusted_sender = false
+trusted_caller = false
+callee_filter = false
