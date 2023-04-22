@@ -1,0 +1,42 @@
+{
+  "contractsDir": "contracts",
+  "outputDir": "src/clarigen",
+  "contracts": [
+    {
+      "file": "traits/sip009-nft-trait.clar",
+      "address": "SPX9XMC02T56N9PRXV4AM9TS88MMQ6A1Z3375MHD"
+    },
+    {
+      "file": "traits/sip010-ft-trait.clar",
+      "address": "SPX9XMC02T56N9PRXV4AM9TS88MMQ6A1Z3375MHD"
+    },
+    {
+      "file": "traits/proposal-trait.clar",
+      "address": "SPX9XMC02T56N9PRXV4AM9TS88MMQ6A1Z3375MHD"
+    },
+    {
+      "file": "traits/extension-trait.clar",
+      "address": "SPX9XMC02T56N9PRXV4AM9TS88MMQ6A1Z3375MHD"
+    },
+    {
+      "file": "dao.clar",
+      "address": "SPKPXQ0X3A4D1KZ4XTP1GABJX1N36VW10D02TK9X"
+    },
+    {
+      "file": "token.clar",
+      "address": "SPKPXQ0X3A4D1KZ4XTP1GABJX1N36VW10D02TK9X"
+    },
+    {
+      "file": "vault.clar",
+      "address": "SPKPXQ0X3A4D1KZ4XTP1GABJX1N36VW10D02TK9X"
+    },
+    {
+      "file": "vote.clar",
+      "address": "SPKPXQ0X3A4D1KZ4XTP1GABJX1N36VW10D02TK9X"
+    },
+    {
+      "file": "submission.clar",
+      "address": "SPKPXQ0X3A4D1KZ4XTP1GABJX1N36VW10D02TK9X"
+    }
+  ]
+}
