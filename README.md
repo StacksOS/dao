@@ -1,1 +1,1 @@
-# @stacks-os/edao
+# @stacks-os/dao

@@ -1,9 +1,9 @@
 {
-  "name": "@stacks-os/edao",
+  "name": "@stacks-os/dao",
   "version": "0.1.0",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/StacksOS/edao.git"
+    "url": "git+https://github.com/StacksOS/dao.git"
   },
   "keywords": [
     "ui",
