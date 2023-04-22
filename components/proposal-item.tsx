@@ -37,11 +37,6 @@ export function ProposalItem({
       )}
       {...props}
     >
-      {/* <span className='flex h-2 w-2 translate-y-1 rounded-full bg-sky-500' />
-      <div className='space-y-1'>
-        <p className='text-sm font-medium leading-none'>{title}</p>
-        <p className='text-sm text-muted-foreground'>{description}</p>
-      </div> */}
       {isGridView ? (
         <Card>
           <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>

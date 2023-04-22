@@ -1,5 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
+  mode: "jit",
   darkMode: ["class"],
   content: [
     './components/**/*.{ts,tsx}',
@@ -75,4 +76,7 @@ module.exports = {
     require('@tailwindcss/line-clamp'),
     require('@tailwindcss/aspect-ratio'),
   ],
+  corePlugins: {
+    preflight: false,
+  },
 }
