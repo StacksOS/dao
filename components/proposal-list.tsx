@@ -1,6 +1,5 @@
 import React from 'react';
 
-import { useProposalContext } from '../hooks/useProposalContext';
 import { cn } from '../utils';
 import { ProposalItem } from './proposal-item';
 
@@ -26,8 +25,6 @@ export function ProposalList({
   ...props
 }: ProposalListProps) {
   const isGridView = view === 'grid';
-  const { address } = useProposalContext();
-  console.log({ address });
 
   return (
     <ProposalListContext.Provider value={{ view }}>

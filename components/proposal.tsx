@@ -27,7 +27,10 @@ function Proposal({ address, className, children, ...props }: ProposalProps) {
   };
   return (
     <ProposalContext.Provider value={value}>
-      <Card className={className} {...props}>
+      <Card
+        className={cn('w-auto border-none p-6 shadow-none', className)}
+        {...props}
+      >
         {children}
       </Card>
     </ProposalContext.Provider>
